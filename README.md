@@ -6,8 +6,6 @@
 Built with [Sovrium](https://sovrium.com) — a configuration-as-code interpreter: one config
 file in, a complete self-hosted web application out.
 
-[![Deploy on Scalingo](https://cdn.scalingo.com/deploy/button.svg)](https://dashboard.scalingo.com/create/app?source=https://github.com/sovrium/api-only-template)
-
 ## Use this template
 
 Click **Use this template** on GitHub to copy this app into your own repository (clean
@@ -15,7 +13,7 @@ history, yours to modify), or scaffold it locally:
 
 ```bash
 curl -fsSL https://sovrium.com/install | sh
-sovrium init my-api --template api-only
+sovrium init my-api-only --template api-only
 ```
 
 ## What's inside
@@ -44,22 +42,6 @@ recipe/record-to-linear-issue`). Without them the app runs exactly the same.
 
 Everything is declared in [`app.yaml`](./app.yaml) and the [`config/`](./config) tree — no
 application code. Replace the tables in `config/tables/`, the backlog in `seed/`.
-
-## Run locally
-
-```bash
-sovrium seed app.yaml        # needs SOVRIUM_SEED_PASSWORD, see .env.example
-sovrium start app.yaml --watch
-```
-
-Zero-config otherwise: embedded SQLite, local file storage. The seed creates three accounts,
-one per role, all with the password in `SOVRIUM_SEED_PASSWORD`:
-
-| Account                          | Role   |
-| -------------------------------- | ------ |
-| `nora.lindqvist@taskapi.example` | admin  |
-| `samir.haddad@taskapi.example`   | member |
-| `julia.weber@taskapi.example`    | viewer |
 
 ## Call it
 
@@ -113,25 +95,45 @@ days late, comes first.
 - `GET /api/tables` lists both tables for every role; a table that names no reader in its
   `permissions` is left out of it.
 
+## Run locally
+
+```bash
+curl -fsSL https://sovrium.com/install | sh
+cp .env.example .env
+sovrium seed app.yaml        # needs SOVRIUM_SEED_PASSWORD in .env
+sovrium start app.yaml --watch
+```
+
+Zero-config: embedded SQLite, local file storage, no variable required to boot.
+[`.env.example`](./.env.example) lists the optional ones this app reads.
+The first administrator comes from `AUTH_ADMIN_EMAIL` and `AUTH_ADMIN_PASSWORD` on the
+first start, or from `sovrium admin create <email>`.
+`--watch` reloads the app each time you save a config file.
+
 ## Deploy
 
-The **Deploy on Scalingo** button above provisions the app with a PostgreSQL addon
-(Scalingo's filesystem is ephemeral — the database keeps your data across deploys; file
-uploads are stored in Postgres too). Secrets are generated automatically; you only fill in
-`BASE_URL`. Any other host works the same way: run the `sovrium` binary with this config
-(see the [deployment guides](https://sovrium.com/en/docs/installation)).
+Ship it to Sovrium Cloud from this directory: sign in once, then deploy. The CLI finds or
+creates the app it deploys to, checks the variables it needs, bundles and uploads it, and
+ends only once the app answers at its address.
+
+```bash
+sovrium login
+sovrium deploy
+```
+
+Any other host works the same way: run the `sovrium` binary with this config (see the
+[deployment guides](https://sovrium.com/en/docs/installation)).
 
 > **The demo accounts are for trying the app, not for running it.** The seed gives every
 > account it creates, the admin included, the one password in `SOVRIUM_SEED_PASSWORD`, and
-> their addresses are published in this README. Before anyone else can reach the app, choose
-> a long password or skip the seed, and change or delete the demo admin. Sign-up is already
-> closed (`allowSignUp: false`), so nobody can add an account of their own.
+> their addresses are in `seed/`. Before anyone else can reach the app, choose a long
+> password or skip the seed, and change or delete the demo admin.
 
 ## About this repository
 
 This repository is **auto-published from the
 [Sovrium monorepo](https://github.com/sovrium/sovrium)** on every release
-(source: [`templates/api-only`](https://github.com/sovrium/sovrium/tree/main/templates/api-only)).
+(source: [`src/templates/api-only`](https://github.com/sovrium/sovrium/tree/main/src/templates/api-only)).
 Issues are welcome here; please send code contributions upstream to the monorepo so the
 template stays in sync with the engine. The pinned engine release lives in
 `.sovrium-version`.
